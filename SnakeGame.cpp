@@ -2,6 +2,8 @@
 #include <conio.h>
 #include <windows.h>
 
+
+#include "Menu.h"
 using namespace std;
 
 #define MAX_LEVEL (5)
@@ -20,6 +22,13 @@ int nTail;
 
 enum eDirection {STOP = 0, LEFT, RIGHT, UP, DOWN};
 eDirection dir;
+
+TMenuStruct mainMenu[] = {
+	{'1', "Joc Nou"},
+	{'2',"Scoruri"},
+	{'q',"Iesire"},
+	{0,  NULL}
+};
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 COORD CursorPosition;
@@ -247,24 +256,74 @@ void GenOneObstacle(int idx)
 	 
 
 }
+
+void DrawMenu(struct menu_struct* myMenu)
+{
+	struct menu_struct* opt;
+	
+	if (myMenu == NULL)
+		return;
+
+	opt = myMenu;
+
+	while (opt->text) {
+		cout << opt->opt << " - " << opt->text << endl;
+		opt++;
+	}
+	
+}
+int menu(struct menu_struct*  myMenu)
+{
+	if (myMenu == NULL)
+		return -1;
+
+	system("cls");
+
+	DrawMenu(myMenu);
+	while (1) {
+		char c = _getch();
+		
+		for (struct menu_struct* opt = myMenu; opt->text != NULL; opt++)
+			if (opt->opt == c)
+				return c;
+	}
+}
 int main()
 {
 	SYSTEMTIME st;
+	char c;
 	GetSystemTime(&st);
 
 	srand(st.wMilliseconds);
 
 	system("cls");
-	
+	while (1) {
+		c = menu(mainMenu);
+		switch (c) {
+		case 'q':
+			return 0;
+		case '1':
+			gotoXY(0, 0);
+			Setup();
+			while (!gameOver)
+			{
+				Draw();
+				Input();
+				Logic();
+				Sleep(150);
+			}
 
-	gotoXY(0, 0);
-	Setup();
-	while (!gameOver)
-	{
-		Draw();
-		Input();
-		Logic();
-		Sleep(150);
+			while (!_kbhit()) {
+				gotoXY(6, 10);
+				cout << "GAME OVER" << endl;
+				Sleep(500);
+				gotoXY(6, 10);
+				cout << "         " << endl;
+				Sleep(200);
+			}
+			_getch();
+			break;
+		}
 	}
 	return 0;
 }
